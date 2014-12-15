@@ -1,4 +1,5 @@
 lightning4j
 ===========
 
-Based netty using java rapid development of lightweight server framework.
+#简介
+一个基于Netty网络库的java服务端轻量级开发框架，用于快速开发手游，页游等服务端程序。
