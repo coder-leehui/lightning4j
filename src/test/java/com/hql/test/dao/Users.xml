@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hql.test.dao">
+    <resultMap id="resultListUser" type="com.hql.test.dao.Users">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="selectUserByID" parameterType="int" resultType="User">
+        select * from `users` where id = #{id}
+    </select>
+
+    <select id="selectUsers" parameterType="string" resultMap="resultListUser">
+        select * from users where name like #{userName}
+    </select>
+
+    <insert id="insertAndGetId" useGeneratedKeys="true" keyProperty="userId" parameterType="com.hql.test.dao.Users">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into users(id, name) values(#{id}, #{name})
+    </insert>
+
+    <update id="updateUser" parameterType="User">
+        update users set name=#{name} where id=#{id}
+    </update>
+
+    <delete id="deleteUser" parameterType="int">
+        delete from users where id=#{id}
+    </delete>
+</mapper>
