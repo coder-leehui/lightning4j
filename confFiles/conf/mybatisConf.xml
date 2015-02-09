@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases> 
+        <typeAlias alias="User" type="com.hql.test.dao.Users"/> 
+    </typeAliases> 
+
+    <environments default="development">
+      <environment id="development">
+        <transactionManager type="JDBC"/>
+          <dataSource type="com.hql.lightning.util.C3P0Util">
+            <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+            <property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/test?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8" />
+            <property name="user" value="root"/>
+            <property name="password" value=""/>
+			<property name="idleConnectionTestPeriod" value="60" />
+			<property name="maxPoolSize" value="20" />
+			<property name="maxIdleTime" value="600" />
+          </dataSource>
+      </environment>
+    </environments>
+    
+    <mappers>
+        <mapper resource="com/hql/test/dao/Users.xml"/>
+    </mappers>
+</configuration>

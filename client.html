@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+  <title>服务端测试工具</title>
+  <meta name="Generator" content="EditPlus">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+ </head>
+
+ <body>
+  <h3>服务器响应</h3>
+  <textarea id="response" style="width:500px;height:300px;"></textarea>
+  <br>
+  <h3>发送内容</h3>
+  <input id="request" type="text" style="width:200px;" value='{"cmd":"test", "module":"test", "data":{"id":"1", "name":"lee"}}'/>
+  <input id="send" type="button" value="发送" onclick="send();"/>
+ </body>
+</html>
+<script>
+var socket = new WebSocket("ws://localhost:9000");
+
+socket.onerror = function(event){
+    console.log(event);
+    alert("WebSocketError!");
+};  
+
+// 打开Socket 
+socket.onopen = function(event) {
+    alert("连接成功！");
+	setInterval("heartBeat()", 5000);
+
+	// 监听消息
+	socket.onmessage = function(event) { 
+		console.log('Client received a message',event); 
+		if (event.data != "heartBeat")
+		{
+		    var ta = document.getElementById("response");
+		    ta.value += (event.data+"\n")
+		}
+	}; 
+
+	// 监听Socket的关闭
+	socket.onclose = function(event) {
+	    console.log('Client notified socket has closed',event); 
+		alert("与服务器断开连接!");
+	};
+};
+
+function send() {
+    socket.send(document.getElementById("request").value);
+}
+
+function heartBeat() {
+    socket.send("heartBeat");
+}
+</script>
