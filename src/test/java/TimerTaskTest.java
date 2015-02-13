@@ -17,6 +17,10 @@ class TimerTest implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("timer worked.");
+        try {
+            System.out.println("timer worked.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.hql.lightning.core;
 
+import com.hql.lightning.util.ModuleUtil;
 import com.hql.lightning.util.ProReaderUtil;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 /**
@@ -10,6 +12,8 @@ import org.apache.log4j.PropertyConfigurator;
  *         2015-1-30
  */
 public class ServerInit {
+
+    private static Logger logger = Logger.getLogger(ServerInit.class);
 
     private static ServerInit instance = new ServerInit();
 
@@ -40,5 +44,13 @@ public class ServerInit {
      */
     public void initConfPath(String path) {
         ProReaderUtil.getInstance().setConfPath(path);
+    }
+
+    /**
+     * 初始化游戏业务模块
+     */
+    public void initModules() {
+        ModuleUtil.getInstance().init();
+        logger.info("The loaded business modules:\n" + ModuleUtil.getInstance().getModuleInfo());
     }
 }

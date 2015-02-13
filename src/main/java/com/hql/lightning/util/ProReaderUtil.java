@@ -2,6 +2,7 @@ package com.hql.lightning.util;
 
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Properties;
@@ -39,6 +40,15 @@ public class ProReaderUtil {
      */
     public void setConfPath(String path) {
         confPath = path;
+    }
+
+    /**
+     * 获取配置文件根路径
+     *
+     * @return
+     */
+    public String getConfPath() {
+        return confPath;
     }
 
     /**
@@ -125,5 +135,15 @@ public class ProReaderUtil {
      */
     public FileInputStream getMyBatisPro() throws Exception {
         return new FileInputStream(confPath + "/conf/mybatisConf.xml");
+    }
+
+    /**
+     * 获取游戏业务模块配置
+     *
+     * @return
+     * @throws Exception
+     */
+    public File getModulePro() throws Exception {
+        return new File(confPath + "/conf/moduleConf.xml");
     }
 }

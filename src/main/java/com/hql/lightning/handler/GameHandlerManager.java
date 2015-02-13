@@ -29,8 +29,8 @@ public class GameHandlerManager {
      * @param cmd
      * @throws Exception
      */
-    public void register(Class<? extends GameHandler> cls, String cmd) throws Exception {
-        handlerMap.put(cmd, cls.newInstance());
+    public void register(GameHandler cls, String cmd) throws Exception {
+        handlerMap.put(cmd, cls);
     }
 
     /**
