@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<handlers>
+  <!--模块名和模块jar文件名对应-->
+  <test>
+    <test><!--handler注册名-->
+      com.hql.test.handler.HandlerTest<!--类名-->
+	</test>
+    <onDisconnect>
+	  com.hql.test.handler.DisconnectHandlerTest
+	</onDisconnect>
+  </test>
+
+  <test2>
+    <test><!--handler注册名-->
+      com.hql.test.handler.HandlerTest<!--类名-->
+	</test>
+    <onDisconnect>
+	  com.hql.test.handler.DisconnectHandlerTest
+	</onDisconnect>
+  </test2>
+</handlers>
