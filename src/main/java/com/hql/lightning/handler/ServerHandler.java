@@ -7,23 +7,27 @@ import com.hql.lightning.channel.GameChannelManager;
 import com.hql.lightning.core.Connection;
 import com.hql.lightning.core.ConnectionManager;
 import com.hql.lightning.core.GameBoss;
-import com.hql.lightning.util.ProReaderUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.websocketx.*;
-import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
+import static io.netty.handler.codec.http.HttpHeaderNames.*;
+import static io.netty.handler.codec.http.HttpMethod.*;
+import static io.netty.handler.codec.http.HttpResponseStatus.*;
+import static io.netty.handler.codec.http.HttpVersion.*;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
 
 /**
  * 数据包处理类
@@ -35,6 +39,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     private static Logger logger = Logger.getLogger(ServerHandler.class);
 
+    private static final String WEBSOCKET_PATH = "/websocket";
+
     private WebSocketServerHandshaker handshaker;
 
     /**
@@ -43,7 +49,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     private static final AttributeKey<Connection> conn = AttributeKey.valueOf("Conn.attr");
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         //传统http数据包接入
         if (msg instanceof FullHttpRequest) {
             handleHttpRequest(ctx, (FullHttpRequest) msg);
@@ -63,17 +69,20 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
      */
     private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
         //http解析失败，返回http异常
-        if (!req.getDecoderResult().isSuccess()) {
-            sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.BAD_REQUEST));
+        if (!req.decoderResult().isSuccess()) {
+            sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
+            return;
+        }
+
+        //只允许GET方法
+        if (req.method() != GET) {
+            sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
             return;
         }
 
         //构造握手响应返回
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
-                "ws://" + ProReaderUtil.getInstance().getNettyPro().get("host") + ":" +
-                        ProReaderUtil.getInstance().getNettyPro().get("port"), null, false
-        );
+                getWebSocketLocation(req), null, true);
 
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
@@ -135,16 +144,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
      * @param res
      */
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
-        if (res.getStatus().code() != 200) {
-            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
+        if (res.status().code() != 200) {
+            ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
             res.content().writeBytes(buf);
             buf.release();
-            HttpHeaders.setContentLength(res, res.content().readableBytes());
+            HttpHeaderUtil.setContentLength(res, res.content().readableBytes());
         }
 
         ChannelFuture f = ctx.channel().writeAndFlush(res);
         //非keep-alive，关闭连接
-        if (!HttpHeaders.isKeepAlive(req) || res.getStatus().code() != 200) {
+        if (!HttpHeaderUtil.isKeepAlive(req) || res.status().code() != 200) {
             f.addListener(ChannelFutureListener.CLOSE);
         }
     }
@@ -175,26 +184,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error(cause.getMessage());
+        cause.printStackTrace();
+        ctx.close();
+    }
 
-        if (cause.getCause() instanceof ReadTimeoutException) {
-            ctx.close();
-            return;
-        }
-
-        if (cause.getCause() instanceof TooLongFrameException) {
-            ctx.close();
-            return;
-        }
-
-        if (cause.getCause() instanceof ClosedChannelException) {
-            return;
-        }
-
-        if (cause.getCause() instanceof IOException) {
-            ctx.close();
-            return;
-        }
-        super.exceptionCaught(ctx, cause);
+    private static String getWebSocketLocation(FullHttpRequest req) {
+        String location =  req.headers().get(HOST) + WEBSOCKET_PATH;
+        return "ws://" + location;
     }
 }

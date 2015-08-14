@@ -1,5 +1,6 @@
 package com.hql.lightning.core;
 
+import com.hql.lightning.util.StackTraceUtil;
 import org.apache.log4j.Logger;
 
 import com.hql.lightning.buffer.GameUpBuffer;
@@ -18,6 +19,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class GameWorker implements Runnable {
 
     private static Logger logger = Logger.getLogger(GameWorker.class);
+
+    private String name;
+
+    /**
+     * 初始化线程名称
+     * @param name
+     */
+    GameWorker(String name) {
+        this.name = name;
+    }
 
     /**
      * 线程运行标志
@@ -79,7 +90,7 @@ public class GameWorker implements Runnable {
             while ((c = msgQueue.poll()) != null) {
                 String cmd = c.getCmd();
                 try {
-                    GameHandler handler = GameHandlerManager.getInstance().getHandler(cmd);
+                    GameHandler handler = GameHandlerManager.getInstance().getHandler(cmd + "-" + name);
                     if (handler != null) {
                         //记录执行时间过长的指令
                         long startTime = System.currentTimeMillis();
@@ -87,13 +98,13 @@ public class GameWorker implements Runnable {
                         long endTime = System.currentTimeMillis();
 
                         if ((startTime - endTime) > 500) {
-                            logger.error("process too long time, cmd:" + cmd);
+                            logger.error("process too long time, cmd:" + cmd + "-" + name);
                         }
                     } else {
                         logger.error("error cmd = " + cmd);
                     }
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
+                    logger.error(StackTraceUtil.getStackTrace(e));
                 }
             }
         }

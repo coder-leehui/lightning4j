@@ -54,6 +54,6 @@ public class GameUpBuffer {
      * @return
      */
     public JSONObject getData() {
-        return buffer.getJSONObject("data");
+        return buffer.containsKey("data") ? buffer.getJSONObject("data") : null;
     }
 }

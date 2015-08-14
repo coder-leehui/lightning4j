@@ -47,8 +47,8 @@ public class MyBatisTest {
             logger.info("updateNum:"+updateNum);*/
 
             //删除记录
-            int delNum = session.update("com.hql.test.dao.deleteUser", 5);
-            logger.info("delNum:" + delNum);
+            //int delNum = session.update("com.hql.test.dao.deleteUser", 5);
+            //logger.info("delNum:" + delNum);
         } finally {
             MyBatisUtil.getInstance().closeSession();
         }

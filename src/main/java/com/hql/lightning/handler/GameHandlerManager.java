@@ -27,10 +27,11 @@ public class GameHandlerManager {
      *
      * @param cls
      * @param cmd
+     * @param module
      * @throws Exception
      */
-    public void register(GameHandler cls, String cmd) throws Exception {
-        handlerMap.put(cmd, cls);
+    public void register(GameHandler cls, String cmd, String module) throws Exception {
+        handlerMap.put(cmd + "-" + module, cls);
     }
 
     /**

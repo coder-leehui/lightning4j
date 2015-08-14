@@ -26,6 +26,11 @@ public class Connection {
 
     private volatile boolean isClosed = false;
 
+    /**
+     * 是否是被踢下线
+     */
+    private boolean isKick = false;
+
     public Connection(int id, ChannelHandlerContext ctx) {
         this.id = id;
         this.ctx = ctx;
@@ -61,5 +66,13 @@ public class Connection {
 
     public boolean isClosed() {
         return isClosed;
+    }
+
+    public boolean isKick() {
+        return isKick;
+    }
+
+    public void setKick(boolean isKick) {
+        this.isKick = isKick;
     }
 }

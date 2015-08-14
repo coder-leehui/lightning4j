@@ -140,7 +140,7 @@ public class ModuleUtil {
             for (Map.Entry<String, String> childEntry : childSets) {
                 Class<?> cls = loader.loadClass(childEntry.getValue());
                 GameHandler handler = (GameHandler) cls.newInstance();
-                GameHandlerManager.getInstance().register(handler, childEntry.getKey());
+                GameHandlerManager.getInstance().register(handler, childEntry.getKey(), childEntry.getValue());
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

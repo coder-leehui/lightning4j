@@ -16,7 +16,7 @@ public class ServiceTest {
         ServerInit.getInstance().initGameWorkers();
         ServerInit.getInstance().initModules();
 
-        TimerTaskUtil.getInstance().run(new AutoUpdateTest(), 10, TimeUnit.SECONDS);
+        //TimerTaskUtil.getInstance().run(new AutoUpdateTest(), 10, TimeUnit.SECONDS);
 
         GameBoss.getInstance().boot(new GameUpProcessor() {
             @Override

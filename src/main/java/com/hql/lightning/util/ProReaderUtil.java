@@ -22,7 +22,7 @@ public class ProReaderUtil {
     /**
      * 配置文件路径
      */
-    private String confPath;
+    private String confPath = "gameFiles";
 
     /**
      * redis配置缓存
@@ -125,6 +125,22 @@ public class ProReaderUtil {
     public String getWorkersPro() {
         Properties properties = getPro("workers");
         return properties.getProperty("workers.member");
+    }
+
+    /**
+     * 获取jdbc配置
+     *
+     * @return
+     */
+    public HashMap<String, String> getJdbcPro() {
+        HashMap<String, String> conf = new HashMap<String, String>();
+        Properties properties = getPro("jdbc");
+        conf.put("driver", properties.getProperty("jdbc.driver"));
+        conf.put("url", properties.getProperty("jdbc.url"));
+        conf.put("userName", properties.getProperty("jdbc.userName"));
+        conf.put("password", properties.getProperty("jdbc.password"));
+
+        return conf;
     }
 
     /**

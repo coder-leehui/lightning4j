@@ -6,7 +6,7 @@
     <groupId>com.hql.lightning4j</groupId>
     <artifactId>lightning4j</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.7</version>
     <name>lightning4j</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>netty</groupId>
             <artifactId>netty</artifactId>
-            <version>4.0.25.Final</version>
+            <version>5.0.0.Alpha2</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -111,6 +111,21 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.1.41</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.3</version>
         </dependency>
     </dependencies>
 </project>

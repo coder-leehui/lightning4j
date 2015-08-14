@@ -5,6 +5,14 @@ lightning4j
 ### 2015/2/13更新内容
 * 增加模块加载工具，实现游戏业务模块热更新
 
+### 2015/8/14更新内容
+* 模块热更新存在严重bug暂时取消
+* netty升级到5.0
+* 增加mysql数据库操作类
+* 增加了http请求方法
+* 修复部分bug及统一异常捕捉日志
+* 开源了本人基于lightning4j开发的html5游戏《无尽战争》的服务端作为示例
+
 ## 简介
 一个基于Netty网络库的java服务端轻量级开发框架，用于快速开发手游，页游等服务端程序，使用WebSocket通信协议，支持mysql，redis，连接池，全局定时任务，心跳检测，可配置逻辑处理线程等，使用简单，部署方便。
 <br><br>**项目网站：**http://www.53hql.com/lightning4j
@@ -68,7 +76,7 @@ lightning4j
 	    <dependency>
 	        <groupId>com.hql</groupId>
 	        <artifactId>lightning4j</artifactId>
-	        <version>1.0.0</version>
+	        <version>1.0.7</version>
 	    </dependency>
     </dependencies>
 
@@ -81,39 +89,19 @@ lightning4j
 ## 基本用法
 * 在IDEA的project目录下新建一个文件夹例如：conf存放配置文件及log，将源码目录下confFile里的内容拷贝到该文件夹中。
 * 修改配置选项为开发者自己的配置
-* 在初始化代码中设置配置文件根路径：`ServerInit.getInstance().initConfPath("conf");`
 * 简历游戏模块工程（new maven module in IntelliJ IDEA）参考项目结构：
 <br>......包<br>
   |--handler（业务逻辑handler）<br>
-  |--model（MyBatis使用的数据dao）<br>
+  |--model（使用的数据dao）<br>
   |--manager(缓存数据管理)<br>
   |--vo（用于映射json的对象）<br>
 * 使用maven打包该module为jar文件
-* 拷贝至confFile里的module目录
-* 配置moduleConf.xml
-
-	    <?xml version="1.0" encoding="UTF-8"?>
-		<handlers>
-		  <!--模块名和模块jar文件名对应-->
-		  <test>
-		    <test><!--handler注册名-->
-		      com.hql.test.handler.HandlerTest<!--类名-->
-			</test>
-		    <onDisconnect>
-			  com.hql.test.handler.DisconnectHandlerTest
-			</onDisconnect>
-	        ......
-		  </test>
-	      ......
-		</handlers>
 * 启动代码示例：<br>
 
         public class Server {
 			public void run() throws Exception {
-			    ServerInit.getInstance().initConfPath("conf");
 			    ServerInit.getInstance().initLog4j();
 			    ServerInit.getInstance().initGameWorkers();
-                ServerInit.getInstance().initModules();
 			
 			    GameBoss.getInstance().boot(new GameUpProcessor() {
 			        @Override
@@ -127,9 +115,7 @@ lightning4j
 			    new Server().run();
 			}
 		}
-* 热更新示例
-
-        ModuleUtil.getInstance().updateModule("test2");//更新test2模块
+* 更多使用详情请参考示例：demo_server
 ## 后续更新计划
 * 性能测试工具
 * 分布式支持
