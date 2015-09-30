@@ -28,16 +28,29 @@ public class GameWorkerManager {
      */
     private HashMap<String, Thread> threads = new HashMap<String, Thread>();
 
+    /**
+     * 工作线程名集合
+     */
+    private final String[] workerSet = ProReaderUtil.getInstance().getWorkersPro().split(",");
+
     public static GameWorkerManager getInstance() {
         return instance;
+    }
+
+    /**
+     * 获取工作线程名集合
+     *
+     * @return
+     */
+    public String[] getWorkerSet() {
+        return workerSet;
     }
 
     /**
      * 初始化工作线程
      */
     public void init() {
-        String[] workers = ProReaderUtil.getInstance().getWorkersPro().split(",");
-        for (String w : workers) {
+        for (String w : workerSet) {
             final GameWorker worker = new GameWorker(w);
             setWorker(w, worker);
         }
@@ -49,7 +62,7 @@ public class GameWorkerManager {
      * @param module
      * @param worker
      */
-    private void setWorker(String module, GameWorker worker) {
+    public void setWorker(String module, GameWorker worker) {
         workers.put(module, worker);
         threads.put(module, new Thread(worker));
         threads.get(module).start();

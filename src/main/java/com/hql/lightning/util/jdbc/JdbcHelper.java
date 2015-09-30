@@ -6,17 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * jdbc助手类
  */
 public class JdbcHelper {
 
-    private static Connection conn = null;
-
-    private static PreparedStatement preparedStatement = null;
-
-    private static CallableStatement callableStatement = null;
+    /**
+     * 从连接池中获取连接
+     *
+     * @return
+     * @throws Exception
+     */
+    public static Connection getConnection() throws Exception {
+        return JdbcUtil.getInstance().getConnection();
+    }
 
     /**
      * 用于查询，返回结果集
@@ -27,20 +30,21 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     @SuppressWarnings("rawtypes")
-    public static List query(String sql) throws SQLException {
-
+    public static List query(String sql) throws Exception {
         ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            getPreparedStatement(sql);
+            //getPreparedStatement(sql);
+            preparedStatement = conn.prepareStatement(sql);
             rs = preparedStatement.executeQuery();
 
             return ResultToListMap(rs);
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, preparedStatement, rs);
         }
-
     }
 
     /**
@@ -55,12 +59,13 @@ public class JdbcHelper {
      */
     @SuppressWarnings("rawtypes")
     public static List query(String sql, Object... paramters)
-            throws SQLException {
+            throws Exception {
 
         ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            getPreparedStatement(sql);
-
+            preparedStatement = conn.prepareStatement(sql);
             for (int i = 0; i < paramters.length; i++) {
                 preparedStatement.setObject(i + 1, paramters[i]);
             }
@@ -69,7 +74,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, preparedStatement, rs);
         }
     }
 
@@ -81,11 +86,13 @@ public class JdbcHelper {
      * @return 结果集
      * @throws java.sql.SQLException
      */
-    public static Object getSingle(String sql) throws SQLException {
+    public static Object getSingle(String sql) throws Exception {
         Object result = null;
         ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            getPreparedStatement(sql);
+            preparedStatement = conn.prepareStatement(sql);
             rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 result = rs.getObject(1);
@@ -94,9 +101,8 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, preparedStatement, rs);
         }
-
     }
 
     /**
@@ -110,12 +116,13 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static Object getSingle(String sql, Object... paramters)
-            throws SQLException {
+            throws Exception {
         Object result = null;
         ResultSet rs = null;
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            getPreparedStatement(sql);
-
+            preparedStatement = conn.prepareStatement(sql);
             for (int i = 0; i < paramters.length; i++) {
                 preparedStatement.setObject(i + 1, paramters[i]);
             }
@@ -127,7 +134,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, preparedStatement, rs);
         }
     }
 
@@ -139,16 +146,16 @@ public class JdbcHelper {
      * @return 影响行数
      * @throws java.sql.SQLException
      */
-    public static int update(String sql) throws SQLException {
-
+    public static int update(String sql) throws Exception {
+        Connection conn = getConnection();
+        PreparedStatement preparedStatement = null;
         try {
-            getPreparedStatement(sql);
-
+            preparedStatement = conn.prepareStatement(sql);
             return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free();
+            JdbcUtil.getInstance().free(conn, preparedStatement, null);
         }
     }
 
@@ -163,10 +170,11 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static int update(String sql, Object... paramters)
-            throws SQLException {
+            throws Exception {
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            getPreparedStatement(sql);
-
+            preparedStatement = conn.prepareStatement(sql);
             for (int i = 0; i < paramters.length; i++) {
                 preparedStatement.setObject(i + 1, paramters[i]);
             }
@@ -174,7 +182,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free();
+            JdbcUtil.getInstance().free(conn, preparedStatement, null);
         }
     }
 
@@ -187,13 +195,13 @@ public class JdbcHelper {
      * @throws Exception
      */
     public static Object insertWithReturnPrimeKey(String sql)
-            throws SQLException {
+            throws Exception {
         ResultSet rs = null;
         Object result = null;
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            conn = JdbcUnits.getConnection();
-            preparedStatement = conn.prepareStatement(sql,
-                    PreparedStatement.RETURN_GENERATED_KEYS);
+            preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.execute();
             rs = preparedStatement.getGeneratedKeys();
             if (rs.next()) {
@@ -202,6 +210,8 @@ public class JdbcHelper {
             return result;
         } catch (SQLException e) {
             throw new SQLException(e);
+        } finally {
+            JdbcUtil.getInstance().free(conn, preparedStatement, rs);
         }
     }
 
@@ -216,11 +226,12 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static Object insertWithReturnPrimeKey(String sql,
-                                                  Object... paramters) throws SQLException {
+                                                  Object... paramters) throws Exception {
         ResultSet rs = null;
         Object result = null;
+        PreparedStatement preparedStatement = null;
+        Connection conn = getConnection();
         try {
-            conn = JdbcUnits.getConnection();
             preparedStatement = conn.prepareStatement(sql,
                     PreparedStatement.RETURN_GENERATED_KEYS);
             for (int i = 0; i < paramters.length; i++) {
@@ -234,8 +245,9 @@ public class JdbcHelper {
             return result;
         } catch (SQLException e) {
             throw new SQLException(e);
+        } finally {
+            JdbcUtil.getInstance().free(conn, preparedStatement, rs);
         }
-
     }
 
     /**
@@ -247,16 +259,18 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     @SuppressWarnings("rawtypes")
-    public static List callableQuery(String procedureSql) throws SQLException {
+    public static List callableQuery(String procedureSql) throws Exception {
         ResultSet rs = null;
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
+            callableStatement = conn.prepareCall(procedureSql);
             rs = callableStatement.executeQuery();
             return ResultToListMap(rs);
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, callableStatement, rs);
         }
     }
 
@@ -272,11 +286,12 @@ public class JdbcHelper {
      */
     @SuppressWarnings("rawtypes")
     public static List callableQuery(String procedureSql, Object... paramters)
-            throws SQLException {
+            throws Exception {
         ResultSet rs = null;
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
-
+            callableStatement = conn.prepareCall(procedureSql);
             for (int i = 0; i < paramters.length; i++) {
                 callableStatement.setObject(i + 1, paramters[i]);
             }
@@ -285,7 +300,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, callableStatement, rs);
         }
     }
 
@@ -297,11 +312,13 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static Object callableGetSingle(String procedureSql)
-            throws SQLException {
+            throws Exception {
         Object result = null;
         ResultSet rs = null;
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
+            callableStatement = conn.prepareCall(procedureSql);
             rs = callableStatement.executeQuery();
             while (rs.next()) {
                 result = rs.getObject(1);
@@ -310,7 +327,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, callableStatement, rs);
         }
     }
 
@@ -323,12 +340,13 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static Object callableGetSingle(String procedureSql,
-                                           Object... paramters) throws SQLException {
+                                           Object... paramters) throws Exception {
         Object result = null;
         ResultSet rs = null;
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
-
+            callableStatement = conn.prepareCall(procedureSql);
             for (int i = 0; i < paramters.length; i++) {
                 callableStatement.setObject(i + 1, paramters[i]);
             }
@@ -340,7 +358,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free(rs);
+            JdbcUtil.getInstance().free(conn, callableStatement, rs);
         }
     }
 
@@ -352,9 +370,11 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static Object callableWithParamters(String procedureSql)
-            throws SQLException {
+            throws Exception {
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
+            callableStatement = conn.prepareCall(procedureSql);
             callableStatement.registerOutParameter(0, Types.OTHER);
             callableStatement.execute();
             return callableStatement.getObject(0);
@@ -362,7 +382,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free();
+            JdbcUtil.getInstance().free(conn, callableStatement, null);
         }
 
     }
@@ -375,14 +395,16 @@ public class JdbcHelper {
      * @return 影响行数
      * @throws java.sql.SQLException
      */
-    public static int callableUpdate(String procedureSql) throws SQLException {
+    public static int callableUpdate(String procedureSql) throws Exception {
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
+            callableStatement = conn.prepareCall(procedureSql);
             return callableStatement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free();
+            JdbcUtil.getInstance().free(conn, callableStatement, null);
         }
     }
 
@@ -396,9 +418,11 @@ public class JdbcHelper {
      * @throws java.sql.SQLException
      */
     public static int callableUpdate(String procedureSql, Object... parameters)
-            throws SQLException {
+            throws Exception {
+        Connection conn = getConnection();
+        CallableStatement callableStatement = null;
         try {
-            getCallableStatement(procedureSql);
+            callableStatement = conn.prepareCall(procedureSql);
             for (int i = 0; i < parameters.length; i++) {
                 callableStatement.setObject(i + 1, parameters[i]);
             }
@@ -406,7 +430,7 @@ public class JdbcHelper {
         } catch (SQLException e) {
             throw new SQLException(e);
         } finally {
-            free();
+            JdbcUtil.getInstance().free(conn, callableStatement, null);
         }
     }
 
@@ -417,12 +441,11 @@ public class JdbcHelper {
      *            一组sql
      * @return
      */
-    public static int[] batchUpdate(List<String> sqlList) {
-
+    public static int[] batchUpdate(List<String> sqlList) throws Exception {
         int[] result = new int[] {};
         Statement statenent = null;
+        Connection conn = getConnection();
         try {
-            conn = JdbcUnits.getConnection();
             conn.setAutoCommit(false);
             statenent = conn.createStatement();
             for (String sql : sqlList) {
@@ -439,7 +462,7 @@ public class JdbcHelper {
             }
             throw new ExceptionInInitializerError(e);
         } finally {
-            free(statenent, null);
+            JdbcUtil.getInstance().free(conn, statenent, null);
         }
         return result;
     }
@@ -463,56 +486,5 @@ public class JdbcHelper {
             list.add(map);
         }
         return list;
-    }
-
-    /**
-     * 获取PreparedStatement
-     *
-     * @param sql
-     * @throws java.sql.SQLException
-     */
-    private static void getPreparedStatement(String sql) throws SQLException {
-        conn = JdbcUnits.getConnection();
-        preparedStatement = conn.prepareStatement(sql);
-    }
-
-    /**
-     * 获取CallableStatement
-     *
-     * @param procedureSql
-     * @throws java.sql.SQLException
-     */
-    private static void getCallableStatement(String procedureSql)
-            throws SQLException {
-        conn = JdbcUnits.getConnection();
-        callableStatement = conn.prepareCall(procedureSql);
-    }
-
-    /**
-     * 释放资源
-     *
-     * @param rs
-     *            结果集
-     */
-    public static void free(ResultSet rs) {
-
-        JdbcUnits.free(conn, preparedStatement, rs);
-    }
-
-    /**
-     * 释放资源
-     *
-     * @param statement
-     * @param rs
-     */
-    public static void free(Statement statement, ResultSet rs) {
-        JdbcUnits.free(conn, statement, rs);
-    }
-
-    /**
-     * 释放资源
-     */
-    public static void free() {
-        free(null);
     }
 }

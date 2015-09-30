@@ -91,12 +91,12 @@ public class ProReaderUtil {
         if (redisConf == null) {
             redisConf = new HashMap<String, String>();
             Properties properties = getPro("redis");
-            redisConf.put("host", properties.getProperty("redis.host"));
-            redisConf.put("port", properties.getProperty("redis.port"));
-            redisConf.put("maxTotal", properties.getProperty("redis.maxTotal"));
-            redisConf.put("maxIdle", properties.getProperty("redis.maxIdle"));
-            redisConf.put("timeOut", properties.getProperty("redis.timeOut"));
-            redisConf.put("retryNum", properties.getProperty("redis.retryNum"));
+            redisConf.put("host", properties.getProperty("redis.host").trim());
+            redisConf.put("port", properties.getProperty("redis.port").trim());
+            redisConf.put("maxTotal", properties.getProperty("redis.maxTotal").trim());
+            redisConf.put("maxIdle", properties.getProperty("redis.maxIdle").trim());
+            redisConf.put("timeOut", properties.getProperty("redis.timeOut").trim());
+            redisConf.put("retryNum", properties.getProperty("redis.retryNum").trim());
         }
 
         return redisConf;
@@ -110,9 +110,9 @@ public class ProReaderUtil {
     public HashMap<String, String> getNettyPro() {
         HashMap<String, String> conf = new HashMap<String, String>();
         Properties properties = getPro("netty");
-        conf.put("port", properties.getProperty("netty.port"));
-        conf.put("host", properties.getProperty("netty.host"));
-        conf.put("heartBeatTimeOut", properties.getProperty("netty.heartBeatTimeOut"));
+        conf.put("port", properties.getProperty("netty.port").trim());
+        conf.put("host", properties.getProperty("netty.host").trim());
+        conf.put("heartBeatTimeOut", properties.getProperty("netty.heartBeatTimeOut").trim());
 
         return conf;
     }
@@ -124,7 +124,7 @@ public class ProReaderUtil {
      */
     public String getWorkersPro() {
         Properties properties = getPro("workers");
-        return properties.getProperty("workers.member");
+        return properties.getProperty("workers.member").trim();
     }
 
     /**
@@ -135,11 +135,16 @@ public class ProReaderUtil {
     public HashMap<String, String> getJdbcPro() {
         HashMap<String, String> conf = new HashMap<String, String>();
         Properties properties = getPro("jdbc");
-        conf.put("driver", properties.getProperty("jdbc.driver"));
-        conf.put("url", properties.getProperty("jdbc.url"));
-        conf.put("userName", properties.getProperty("jdbc.userName"));
-        conf.put("password", properties.getProperty("jdbc.password"));
-
+        conf.put("driver", properties.getProperty("jdbc.driver").trim());
+        conf.put("url", properties.getProperty("jdbc.url").trim());
+        conf.put("userName", properties.getProperty("jdbc.userName").trim());
+        conf.put("password", properties.getProperty("jdbc.password").trim());
+        conf.put("initialSize", properties.getProperty("jdbc.initialSize").trim());
+        conf.put("maxTotal", properties.getProperty("jdbc.maxTotal").trim());
+        conf.put("maxConnLifetimeMillis", properties.getProperty("jdbc.maxConnLifetimeMillis").trim());
+        conf.put("maxIdle", properties.getProperty("jdbc.maxIdle").trim());
+        conf.put("minIdle", properties.getProperty("jdbc.minIdle").trim());
+        conf.put("maxWaitMillis", properties.getProperty("jdbc.maxWaitMillis").trim());
         return conf;
     }
 

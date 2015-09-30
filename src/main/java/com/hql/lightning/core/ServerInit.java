@@ -53,4 +53,19 @@ public class ServerInit {
         ModuleUtil.getInstance().init();
         logger.info("The loaded business modules:\n" + ModuleUtil.getInstance().getModuleInfo());
     }
+
+    /**
+     * 工作线程运行状态检查
+     */
+    public void initWorkerRunStatusCheck() {
+        String[] workers = GameWorkerManager.getInstance().getWorkerSet();
+        for (String worker : workers) {
+            Thread t = GameWorkerManager.getInstance().getThread(worker);
+            if (t == null || !t.isAlive()) {
+                logger.error("work thread:"+worker+" was crashed.");
+                final GameWorker gw = new GameWorker(worker);
+                GameWorkerManager.getInstance().setWorker(worker, gw);
+            }
+        }
+    }
 }

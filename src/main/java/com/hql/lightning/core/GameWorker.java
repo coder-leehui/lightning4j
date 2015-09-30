@@ -78,7 +78,7 @@ public class GameWorker implements Runnable {
                     try {
                         msgQueue.wait();
                     } catch (InterruptedException e) {
-                        logger.info("receive an interrupted msg, now the state is " + isRunning);
+                        logger.error("receive an interrupted msg, now the state is " + isRunning);
                         if (!isRunning) {
                             return;
                         }
