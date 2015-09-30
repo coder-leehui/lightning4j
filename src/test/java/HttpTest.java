@@ -14,18 +14,23 @@ public class HttpTest {
         ServerInit.getInstance().initConfPath("lightning");
         ServerInit.getInstance().initLog4j();
 
-        Map<String, String> param = new HashMap<>();
-        param.put("a", "is a");
-        param.put("b", "is b");
+        for (int i = 0; i < 100; i++) {
+            new Thread(new worker()).start();
+        }
+    }
 
-        Map<String, String> param2 = new HashMap<>();
-        param2.put("a", "is a2");
-        param2.put("b", "is b2");
+    static class worker implements Runnable {
+        public void run() {
+            Map<String, String> param = new HashMap<>();
+            param.put("a", "is a");
+            param.put("b", "is b");
 
-        String getData = HttpUtil.doGet("http://127.0.0.1/test.php", param);
-        System.out.println(getData);
-        System.out.println("----------------------分割线-----------------------");
-        String postData = HttpUtil.doPost("http://127.0.0.1/test.php", param2);
-        System.out.println(postData);
+            try {
+                String getData = HttpUtil.getInstance().doPost("http://127.0.0.1/test.php", param);
+                System.out.println(getData);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
